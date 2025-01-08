@@ -7,11 +7,6 @@ export default function BentoBox() {
     return (
         <div className="min-h-screen dark bg-background">
             <div className="container mx-auto p-4">
-                <iframe
-                    width="420"
-                    height="315"
-                    src="https://www.youtube.com/embed/tgbNymZ7vqY"
-                ></iframe>
                 <div className="grid grid-cols-1 gap-4 max-w-4xl mx-auto">
                     <KanbanBoard />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
