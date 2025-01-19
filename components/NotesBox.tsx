@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,26 @@ export default function NotesBox() {
     const [notes, setNotes] = useState<Note[]>([]);
     const [currentNote, setCurrentNote] = useState("");
 
+    useEffect(() => {
+        // Load notes from localStorage on mount
+        const storedNotes = localStorage.getItem("notes");
+        if (storedNotes) {
+            setNotes(JSON.parse(storedNotes));
+        }
+    }, []);
+
+    const saveToLocalStorage = (updatedNotes: Note[]) => {
+        localStorage.setItem("notes", JSON.stringify(updatedNotes));
+    };
+
     const addNote = () => {
         if (currentNote.trim() !== "") {
-            setNotes([
+            const updatedNotes = [
                 ...notes,
                 { id: Date.now().toString(), content: currentNote },
-            ]);
+            ];
+            setNotes(updatedNotes);
+            saveToLocalStorage(updatedNotes);
             setCurrentNote("");
         } else {
             toast({
@@ -34,7 +48,9 @@ export default function NotesBox() {
     };
 
     const deleteNote = (id: string) => {
-        setNotes(notes.filter((note) => note.id !== id));
+        const updatedNotes = notes.filter((note) => note.id !== id);
+        setNotes(updatedNotes);
+        saveToLocalStorage(updatedNotes);
     };
 
     return (

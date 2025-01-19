@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,14 +20,29 @@ type Column = {
 
 export default function KanbanBoard() {
     const { toast } = useToast();
-    const [columns, setColumns] = useState<Column[]>([
-        { id: "todo", title: "To Do", tasks: [] },
-        { id: "inProgress", title: "In Progress", tasks: [] },
-        { id: "done", title: "Done", tasks: [] },
-    ]);
+    const [columns, setColumns] = useState<Column[]>([]);
     const [newTask, setNewTask] = useState("");
 
-    const addTask = () => {
+    useEffect(() => {
+        // Load tasks from localStorage on mount
+        const storedColumns = localStorage.getItem("kanbanColumns");
+        if (storedColumns) {
+            setColumns(JSON.parse(storedColumns));
+        } else {
+            setColumns([
+                { id: "todo", title: "To Do", tasks: [] },
+                { id: "inProgress", title: "In Progress", tasks: [] },
+                { id: "done", title: "Done", tasks: [] },
+            ]);
+        }
+    }, []);
+
+    const saveToLocalStorage = (updatedColumns: Column[]) => {
+        localStorage.setItem("kanbanColumns", JSON.stringify(updatedColumns));
+    };
+
+    const addTask = (e: React.FormEvent) => {
+        e.preventDefault();
         if (newTask.trim() !== "") {
             const updatedColumns = [...columns];
             updatedColumns[0].tasks.push({
@@ -35,6 +50,7 @@ export default function KanbanBoard() {
                 content: newTask,
             });
             setColumns(updatedColumns);
+            saveToLocalStorage(updatedColumns);
             setNewTask("");
         } else {
             toast({
@@ -56,6 +72,7 @@ export default function KanbanBoard() {
             return column;
         });
         setColumns(updatedColumns);
+        saveToLocalStorage(updatedColumns);
     };
 
     const onDragStart = (
@@ -100,6 +117,7 @@ export default function KanbanBoard() {
         });
 
         setColumns(updatedColumns);
+        saveToLocalStorage(updatedColumns);
     };
 
     return (
@@ -108,7 +126,7 @@ export default function KanbanBoard() {
                 <CardTitle>Kanban Board</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex mb-4">
+                <form onSubmit={addTask} className="flex mb-4">
                     <Input
                         type="text"
                         placeholder="Add a new task"
@@ -116,8 +134,8 @@ export default function KanbanBoard() {
                         onChange={(e) => setNewTask(e.target.value)}
                         className="mr-2 bg-input"
                     />
-                    <Button onClick={addTask}>Add</Button>
-                </div>
+                    <Button type="submit">Add</Button>
+                </form>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {columns.map((column) => (
                         <div
