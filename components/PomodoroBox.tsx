@@ -52,6 +52,7 @@ export default function PomodoroBox() {
             }, 1000);
         } else if (timeLeft === 0) {
             setIsActive(false);
+            playSound();
             if (mode === "focus") {
                 const newCycles = focusCycles + 1;
                 setFocusCycles(newCycles);
@@ -73,6 +74,11 @@ export default function PomodoroBox() {
             if (interval) clearInterval(interval);
         };
     }, [isActive, timeLeft, mode, focusCycles, template]);
+
+    const playSound = () => {
+        const audio = new Audio("/festive-melody-audio-sound-effect.mp3");
+        audio.play();
+    };
 
     const toggleTimer = () => {
         setIsActive(!isActive);
