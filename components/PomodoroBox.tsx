@@ -28,6 +28,11 @@ const defaultTemplates: Template[] = [
     { name: "Long", focus: 60, shortBreak: 10, longBreak: 25 },
 ];
 
+interface PomodoroBoxProps {
+    initialMinutes?: number;
+    onComplete?: () => void;
+}
+
 export default function PomodoroBox() {
     const [templates, setTemplates] = useState<Template[]>(defaultTemplates);
     const [mode, setMode] = useState<TimerMode>("focus");
@@ -145,6 +150,69 @@ export default function PomodoroBox() {
             .padStart(2, "0")}`;
     };
 
+    const Timer = ({ initialMinutes = 25, onComplete }: PomodoroBoxProps) => {
+        const [timeLeft, setTimeLeft] = useState(initialMinutes * 60);
+        const [isActive, setIsActive] = useState(false);
+
+        useEffect(() => {
+            let interval: NodeJS.Timeout;
+
+            if (isActive && timeLeft > 0) {
+                interval = setInterval(() => {
+                    setTimeLeft((time) => {
+                        if (time <= 1) {
+                            setIsActive(false);
+                            onComplete?.();
+                            return 0;
+                        }
+                        return time - 1;
+                    });
+                }, 1000);
+            }
+
+            return () => clearInterval(interval);
+        }, [isActive, timeLeft, onComplete]);
+
+        const formatTime = (seconds: number): string => {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+                .toString()
+                .padStart(2, "0")}`;
+        };
+
+        const handleToggle = () => {
+            setIsActive(!isActive);
+        };
+
+        const handleReset = () => {
+            setIsActive(false);
+            setTimeLeft(initialMinutes * 60);
+        };
+
+        return (
+            <div className="p-4 border rounded-lg shadow-sm">
+                <div className="text-4xl font-bold text-center mb-4">
+                    {formatTime(timeLeft)}
+                </div>
+                <div className="flex justify-center gap-2">
+                    <button
+                        onClick={handleToggle}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        {isActive ? "Pause" : "Start"}
+                    </button>
+                    <button
+                        onClick={handleReset}
+                        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                    >
+                        Reset
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <Card className="h-full bg-card">
             <CardHeader>
@@ -169,18 +237,20 @@ export default function PomodoroBox() {
                     </div>
                 </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col mt-7">
+            <CardContent className="flex flex-col mt-7 lg:px-8 lg:pt-8">
                 <div className="text-center space-y-6 flex-grow flex flex-col justify-center">
                     <div
                         className={`font-bold tracking-tighter transition-all ${
-                            showControls ? "text-7xl" : "text-8xl"
+                            showControls
+                                ? "text-4xl sm:text-6xl md:text-7xl lg:text-8xl"
+                                : "text-5xl sm:text-7xl md:text-8xl lg:text-9xl"
                         }`}
                     >
                         {formatTime(timeLeft)}
                     </div>
                     {showControls && (
                         <>
-                            <div className="text-sm text-muted-foreground mb-4">
+                            <div className="text-xs sm:text-sm text-muted-foreground mb-4">
                                 {mode === "focus"
                                     ? `Concentration Time: ${template.focus} minutes`
                                     : mode === "shortBreak"
