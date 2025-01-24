@@ -19,6 +19,7 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer";
+import { ThemeToggle } from "./ThemeToggle";
 
 type Task = {
     id: string;
@@ -203,7 +204,7 @@ export default function KanbanBoard() {
         const dragPreview = taskElement.cloneNode(true) as HTMLElement;
         dragPreview.style.backgroundColor = "#09090B";
         dragPreview.style.color = "#fff";
-        dragPreview.style.width = "120px";
+        dragPreview.style.width = "200px";
         dragPreview.style.position = "absolute";
         dragPreview.style.top = "-9999px";
         document.body.appendChild(dragPreview);
@@ -302,8 +303,9 @@ export default function KanbanBoard() {
 
     return (
         <Card className="h-full bg-card">
-            <CardHeader>
-                <CardTitle>Kanban Board</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between w-full">
+                <CardTitle className="flex-1">Kanban Board</CardTitle>
+                <ThemeToggle />
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
